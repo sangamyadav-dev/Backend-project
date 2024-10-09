@@ -11,11 +11,11 @@ const userSchema = new Schema({
     },
     username: {
         type: String,
-        required: [true, 'username is required'],
+        required: true,
         unique: true,
         lowercase: true,
         trim: true,
-        index:true
+        index: true
     },
     email: {
         type: String,
@@ -26,13 +26,10 @@ const userSchema = new Schema({
     password: {
         type: String,
         required: [true, 'password is required'],
-        unique: true,
-        trim: true,
-        lowercase: true
     },
     avatar: {
         type: String,
-        required: true
+        // required: true
     },
     coverImage: {
         type: String,
@@ -49,7 +46,7 @@ const userSchema = new Schema({
 }, {timestamps: true})
 
 userSchema.pre('save', async function (next) {
-    if(!this.isModified("password")) return next()
+    if(!this.isModified("password")) return next();
 
     this.password = await bcrypt.hash(this.password, 10)
     next()
@@ -64,7 +61,7 @@ userSchema.methods.generateATS = function () {
 
     return jwt.sign(
         {
-            id: this._id,
+            _id: this._id,
             username: this.username,
             email: this.email,
             fullName: this.fullName
@@ -79,7 +76,7 @@ userSchema.methods.generateRTS = function(){
 
     return jwt.sign(
         {
-            id: this._id,
+            _id: this._id,
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
