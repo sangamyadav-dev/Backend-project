@@ -156,7 +156,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = ( async (req, res) =>{
   const upcomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
-  if(upcomingRefreshToken){
+
+  if(!upcomingRefreshToken){
     throw new ApiError(401, "UnAuthrozie Refresh Token")
   }
 

@@ -56,9 +56,7 @@ userSchema.methods.isPasswordCorrect = async function
 (password) {
     return await bcrypt.compare(password, this.password)
 }
-
 userSchema.methods.generateATS = function () {
-
     return jwt.sign(
         {
             _id: this._id,
@@ -73,7 +71,6 @@ userSchema.methods.generateATS = function () {
     )
 }
 userSchema.methods.generateRTS = function(){
-
     return jwt.sign(
         {
             _id: this._id,
@@ -84,5 +81,4 @@ userSchema.methods.generateRTS = function(){
         }
     )
 }
-
 export const User = mongoose.model('User', userSchema)
