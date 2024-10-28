@@ -1,10 +1,11 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
-// import { uploadOnCloudinary } from "../utils/cloudnary.js";
+import { uploadOnCloudinary } from "../utils/cloudnary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
 
+//  GENERATE ACCESS TOKEN AND REFRESH TOKEN
 const generateAccessTokenAndRefreshTokens = async(userId) => {
   try {
     const user = await User.findById(userId)
@@ -84,7 +85,7 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 //  USER LOGIN
-const loginUser = asyncHandler(async (req, res) =>{
+const loginUser = asyncHandler(async (req, res) => {
 
     const {username, email, password } = req.body
 
@@ -154,7 +155,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User LoggedOut Successfully"))
 })
 
-const refreshAccessToken = ( async (req, res) =>{
+// REFRESH ACCESS TOKEN
+const refreshAccessToken = asyncHandler( async (req, res) => {
   const upcomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
   if(!upcomingRefreshToken){
@@ -194,9 +196,126 @@ const refreshAccessToken = ( async (req, res) =>{
   }
 })
 
+// CHANGE CURRENT USER PASSWORD
+const changeCurrentUserPassword = asyncHandler( async (req, res) => {
+  const {oldPassword, newPassword} = req.body
+
+  const user = await User.findById(req.user?._id)
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+
+  if(!isPasswordCorrect){
+    throw new ApiError(400, "Invalid Old Password")
+  }
+
+  user.password = newPassword
+
+  await user.save({validateBeforeSave: false})
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password Changed Successfully"))
+
+})
+
+// GET CURRENT USER LOGIN
+const getCurrentUser = asyncHandler( async(req, res) =>{
+  return res
+    .status(200)
+    .json(200, req.user, "User Found Success")
+})
+
+// UPDATE USER ACCOUNT DETAILS
+const updateAccountDetails = asyncHandler( async(req, res) => {
+  const {fullName, email} = req.body
+
+  if(!fullName && !email){
+    throw new ApiError(400, "fullName and email Required")
+  }
+
+  const user = User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        fullName,
+        email
+      }
+    },
+    {new: true}
+  ).select("-password")
+
+  return res
+  .status(200)
+  .json(new ApiResponse(200, user, "Account Details Updated Successfully"))
+})
+
+// UPDATE USER AVATAR
+const updateAvatar = asyncHandler( async(req, res) => {
+
+  const avatarLocalPath = req.file?.path
+
+  if(!avatarLocalPath){
+    throw new ApiError(400, "Avatar file is Missing")
+  }
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath)
+
+  if(!avatar.url){
+    throw new ApiError(400, "Avatar file Uploading Error")
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        avatar: avatar.url
+      }
+    },
+    {new: true}
+  ).select("-password")
+
+  return res
+  .status(200)
+  .json(new ApiResponse(200, user, "Avatar Updated Successfully"))
+})
+
+// UPDATE USER COVERIMAGE
+const updatecoverImage = asyncHandler( async(req, res) => {
+
+  const coverImageLocalPath = req.file?.path
+
+  if(!coverImageLocalPath){
+    throw new ApiError(400, "cover Image file is Missing")
+  }
+
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+
+  if(!coverImage.url){
+    throw new ApiError(400, "cover Image file Uploading Error")
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        coverImage: coverImage.url
+      }
+    },
+    {new: true}
+  ).select("-password")
+
+  return res
+  .status(200)
+  .json(new ApiResponse(200, user, "cover Image Updated Successfully"))
+})
+
 export {
     registerUser,
     loginUser,
     logoutUser,
-    refreshAccessToken
+    refreshAccessToken,
+    changeCurrentUserPassword,
+    getCurrentUser,
+    updateAccountDetails,
+    updateAvatar,
+    updatecoverImage
   };
