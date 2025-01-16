@@ -6,6 +6,7 @@ import {
   refreshAccessToken,
   changeCurrentUserPassword,
   getCurrentUser,
+  updateAccountDetails,
   updateAvatar,
   updatecoverImage,
   getuserChannelProfile,
@@ -33,10 +34,10 @@ router.route("/register").post(
 router.route("/login").post(loginUser);
 
 // SECURED ROUTE
-router.route("/logout User").post(verifyJWT, logoutUser);
-router.route("/Refresh Token").post(refreshAccessToken);
-router.route("/change password").post(verifyJWT, changeCurrentUserPassword);
-router.route("/current user").get(verifyJWT, getCurrentUser);
+router.route("/logout-User").post(verifyJWT, logoutUser);
+router.route("/Refresh-Token").post(refreshAccessToken);
+router.route("/change-password").post(verifyJWT, changeCurrentUserPassword);
+router.route("/current-user").get(verifyJWT, getCurrentUser);
 router.route("/update Account Details").patch(verifyJWT, updateAccountDetails);
 router
   .route("/update Avatar")
