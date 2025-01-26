@@ -4,14 +4,24 @@ import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 
-const toggleVedioLike = asyncHandler(async (res, req) => {
+const toggleVideosLike = asyncHandler(async (res, req) => {
   const { videoId } = req.params;
   const { user } = req;
-  const existingLike = await like.findOne({ videoId, user: user._id });
+  const existingLike = await like.findOne(
+    { videoId, user: user._id }
+  );
   if (!existingLike) {
-    const newLike = new like({ videoId, user: user._id });
+    const newLike = new like(
+      { videoId,
+        user: user._id
+      }
+    );
     await newLike.save();
-    return new ApiResponse(res, 201, newLike);
+    return new ApiResponse(
+      res,
+      201,
+      newLike
+    );
   }
   await like.findByIdAndDelete(existingLike._id);
   return new ApiResponse(res, 200, { message: "Like removed" });
@@ -76,7 +86,7 @@ const getLikedVideos = asyncHandler(async (res, req) => {
 });
 
 export {
-    toggleVedioLike,
+  toggleVideosLike,
     toggleCommentLike,
     toggleTweetLike,
     getLikedVideos
